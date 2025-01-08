@@ -1,52 +1,30 @@
-import clsx from "clsx";
-import gsap from "gsap";
-import { useWindowScroll } from "react-use";
-import { useEffect, useRef, useState } from "react";
-import { TiLocationArrow } from "react-icons/ti";
-
+import React, { useEffect, useRef, useState } from "react";
 import Button from "./Button";
+import { TiLocationArrow } from "react-icons/ti";
+import { useWindowScroll } from "react-use";
+import gsap from "gsap";
 
 const navItems = ["Nexus", "Vault", "Prologue", "About", "Contact"];
 
-const NavBar = () => {
-  // State for toggling audio and visual indicator
+const Navbar = () => {
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [isIndicatorActive, setIsIndicatorActive] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [isNavVisible, setIsNavVisible] = useState(true);
 
-  // Refs for audio and navigation container
-  const audioElementRef = useRef(null);
   const navContainerRef = useRef(null);
+  const audioElementRef = useRef(null);
 
   const { y: currentScrollY } = useWindowScroll();
-  const [isNavVisible, setIsNavVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
-
-  // Toggle audio and visual indicator
-  const toggleAudioIndicator = () => {
-    setIsAudioPlaying((prev) => !prev);
-    setIsIndicatorActive((prev) => !prev);
-  };
-
-  // Manage audio playback
-  useEffect(() => {
-    if (isAudioPlaying) {
-      audioElementRef.current.play();
-    } else {
-      audioElementRef.current.pause();
-    }
-  }, [isAudioPlaying]);
 
   useEffect(() => {
     if (currentScrollY === 0) {
-      // Topmost position: show navbar without floating-nav
       setIsNavVisible(true);
       navContainerRef.current.classList.remove("floating-nav");
     } else if (currentScrollY > lastScrollY) {
-      // Scrolling down: hide navbar and apply floating-nav
       setIsNavVisible(false);
       navContainerRef.current.classList.add("floating-nav");
     } else if (currentScrollY < lastScrollY) {
-      // Scrolling up: show navbar with floating-nav
       setIsNavVisible(true);
       navContainerRef.current.classList.add("floating-nav");
     }
@@ -62,6 +40,19 @@ const NavBar = () => {
     });
   }, [isNavVisible]);
 
+  const toggleAudioIndicator = () => {
+    setIsAudioPlaying((prev) => !prev);
+    setIsIndicatorActive((prev) => !prev);
+  };
+
+  useEffect(() => {
+    if (isAudioPlaying) {
+      audioElementRef.current.play();
+    } else {
+      audioElementRef.current.pause();
+    }
+  }, [isAudioPlaying]);
+
   return (
     <div
       ref={navContainerRef}
@@ -69,10 +60,8 @@ const NavBar = () => {
     >
       <header className="absolute top-1/2 w-full -translate-y-1/2">
         <nav className="flex size-full items-center justify-between p-4">
-          {/* Logo and Product button */}
           <div className="flex items-center gap-7">
             <img src="/img/logo.png" alt="logo" className="w-10" />
-
             <Button
               id="product-button"
               title="Products"
@@ -80,13 +69,11 @@ const NavBar = () => {
               containerClass="bg-blue-50 md:flex hidden items-center justify-center gap-1"
             />
           </div>
-
-          {/* Navigation Links and Audio Button */}
           <div className="flex h-full items-center">
             <div className="hidden md:block">
-              {navItems.map((item, index) => (
+              {navItems.map((item) => (
                 <a
-                  key={index}
+                  key={item}
                   href={`#${item.toLowerCase()}`}
                   className="nav-hover-btn"
                 >
@@ -94,10 +81,9 @@ const NavBar = () => {
                 </a>
               ))}
             </div>
-
             <button
+              className="ml-10 flex items-center space-x-0.5 "
               onClick={toggleAudioIndicator}
-              className="ml-10 flex items-center space-x-0.5"
             >
               <audio
                 ref={audioElementRef}
@@ -108,12 +94,10 @@ const NavBar = () => {
               {[1, 2, 3, 4].map((bar) => (
                 <div
                   key={bar}
-                  className={clsx("indicator-line", {
-                    active: isIndicatorActive,
-                  })}
-                  style={{
-                    animationDelay: `${bar * 0.1}s`,
-                  }}
+                  className={`indicator-line ${
+                    isIndicatorActive ? "active" : ""
+                  }`}
+                  style={{ animationDelay: `${bar * 0.1}s` }}
                 />
               ))}
             </button>
@@ -124,4 +108,4 @@ const NavBar = () => {
   );
 };
 
-export default NavBar;
+export default Navbar;
